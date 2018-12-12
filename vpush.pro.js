@@ -135,8 +135,10 @@ class vPush {
           let { data } = ret;
           if (data.errcode === 0) {
             console.log('[vpush.togglePush.ok]', data.message);
+            RES();
           } else {
             console.warn('[vpush.togglePush.fail]', data.errmsg);
+            REJ(data.errmsg);
           }
         }
       })
@@ -147,6 +149,7 @@ class vPush {
    * 检查是否开启了推送
    */
   isOpenPush() {
+    if (!this.OPEN_ID) return console.warn('[vPush.isOpenPush] 尚未初始化完毕');
     return new Promise((RES, REJ) => {
       wx.request({
         url: `${this.HOST}/c/push.php?openid=${this.OPEN_ID}`,

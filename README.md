@@ -1,14 +1,28 @@
 ## vPush SDK Pro
 
 > 高级版本专用    
-> https://mssnn.cn
+> https://mssnn.cn    
+> 详细文档：http://doc.mssnn.cn
+
+## 配置域名
+我们为每一个开发者都配置了独立的子域名，你可以直接在浏览器中输入：
+[https://你的小程序AppId.mssnn.cn](https://mssnn.cn)    
+进入开发控制台（初次访问需要进行简单注册）    
+
+同时，这个地址也是收集推送凭证等后端API服务地址，所以我们前往微信公众号平台，在开发设置里配置request域名为此。
 
 ## 配置SDK
-首先下载`vpush.pro.js`文件到小程序目录，然后再在`app.js`中引入并设置为全局变量：
+
+### 1. clone本仓库到你的微信小程序目录
+``` bash
+$ git clone https://github.com/guren-cloud/vpush-pro-sdk
+```
+
+### 2. 编辑`app.js`，引入sdk的`vpush.pro.js`文件，并初始化一个全局的`vPush`变量：
 
 ``` js
 // app.js
-var vPush = require('./libs/vpush.pro.js');
+var vPush = require('./libs/vpush-pro-sdk/vpush.pro.js');
 
 App({
   vPush: new vPush('小程序的appId'),
@@ -17,37 +31,29 @@ App({
 });
 ```
 
-配置完成之后，我们就可以在页面的js文件中引入该变量了：
-``` js
-// pages/home/index.js
-var { vPush } = getApp();
+> 初始化vPush类，需要传递你当前的微信小程序AppId
 
-Page({
-  // 在这里加上vPush方法提供组件调用
-  vPushAdd: vPush.add.bind(vPush),
-  data: {},
-  onLoad: function (options) {}
-})
+### 3. 使用sdk的组件
+> 在sdk的`components`里，我们预置了部分组件，让你只需要经过简单的配置使用即可完成自动收集推送凭证流程。
+
+页面json配置：
+``` json
+{
+  "usingComponents": {
+    "vpush-view": "/vpush-pro-sdk/components/view"
+  }
+}
 ```
-页面增加了`vPushAdd`方法，就可以在组件中调用这个函数以进行存储推送凭证了：
 
+页面wxml引入：
 ``` wxml
-<!-- pages/home/index.wxml -->
-<form report-submit bindsubmit='vPushAdd'>
-  <button form-type='submit'>点击我添加formId</button>
-</form>
+  <vpush-view>点击收集凭证</vpush-view>
 ```
 
-## 配置域名
-> 目前采用的是国内已备案的`*.mssnn.cn`域名
+你可以传递`onClickHandler`以绑定页面定义的方法，以及传递`custom-class`自定义组件样式
 
-进入微信开发平台，设置域名里，添加如下`request`域名：
+[**更详细的文档，请移至：http://doc.mssnn.cn**](http://doc.mssnn.cn)
 
-```
-https://你的小程序AppId.mssnn.cn
-```
-
-同样，这个URL地址，也是小程序推送的管理面板后台地址，你可以直接在浏览器中打开并登陆使用。
 
 ## 旧版本迁移
 如果你的小程序项目中已经配置过旧版本（目前称之为社区版）的SDK，那么除了重新配置外，还可以通过稍微修改，以达到兼容的目的。
