@@ -196,6 +196,8 @@ class vPush {
     // 判断formId是否为测试的
     if (formId.startsWith('the formId')) return console.warn('[vpush] 调试的无效formId：', formId);
 
+    // 获取当前页面地址
+    let page = getCurrentPages()[0].route;
     wx.request({
       url: `${this.HOST}/c/formId.php?openid=${this.OPEN_ID}`,
       method: 'POST',
@@ -203,6 +205,7 @@ class vPush {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
       data: {
+        page,
         formId
       },
       success: ret => {
