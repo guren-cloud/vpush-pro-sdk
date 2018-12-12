@@ -6,7 +6,8 @@
 
 ## 示例
 小程序代码片段地址：[https://developers.weixin.qq.com/s/Pa49BCm6704K](https://developers.weixin.qq.com/s/Pa49BCm6704K)    
-> 提示：经过测试，测试号appId可进行正常操作，但无法接收模板消息。
+> 提示：经过测试，测试号appId可进行正常操作，但无法接收模板消息。    
+> 导入请务必填写正确的AppId，以及修改`app.js`中`new vPush`定义的AppId
 
 ## 配置域名
 我们为每一个开发者都配置了独立的子域名，你可以直接在浏览器中输入：
