@@ -6,7 +6,7 @@
  * 社区版网址：https://guren.cloud
  * =============
  * https://github.com/guren-cloud/vpush-pro-sdk
- * 更新时间：20181127
+ * 更新时间：20181224
  */
 
 class vPush {
@@ -170,15 +170,15 @@ class vPush {
 
   // 兼容社区版SDK
   add(e) {
-    this.addFormId(e);
+    return this.addFormId(e);
   }
-  setTags () {
+  setTags() {
     console.warn('[vPush.setTags.warn] 此方法已弃用，请移除');
   }
-  setAlias () {
+  setAlias() {
     console.warn('[vPush.setAlias.warn] 此方法已弃用，请移除');
   }
-  pushToMe () {
+  pushToMe() {
     console.warn('[vPush.pushToMe.warn] 此方法已弃用，请移除');
   }
 
@@ -186,7 +186,7 @@ class vPush {
   /**
    * 添加推送凭证
    */
-  addFormId(e) {
+  addFormId(e, callback) {
     var formId = '';
     if (typeof e === 'object') {
       formId = e.detail.formId;
@@ -194,7 +194,10 @@ class vPush {
       formId = String(e);
     }
     // 判断formId是否为测试的
-    if (formId.startsWith('the formId')) return console.warn('[vpush] 调试的无效formId：', formId);
+    if (formId.startsWith('the formId') || formId.startsWith('[') || formId === 'undefined') {
+      callback && callback();
+      return console.warn('[vpush] 调试的无效formId：', formId);
+    }
 
     // 获取当前页面地址
     let page = getCurrentPages()[0].route;
@@ -209,6 +212,7 @@ class vPush {
         formId
       },
       success: ret => {
+        callback && callback();
         console.log('[vpush.addFormId.ret]', ret);
         const { data } = ret;
         if (data.errcode !== 0) {
