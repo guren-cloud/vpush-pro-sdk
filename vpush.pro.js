@@ -6,7 +6,10 @@
  * 社区版网址：https://guren.cloud
  * =============
  * https://github.com/guren-cloud/vpush-pro-sdk
- * 更新时间：20181224
+ * 更新时间：20190107
+ * -------------
+ * 使用方法：
+ * app.js中引入此模块，然后初始化：App({ vPush: new vPush('你的小程序appId'), ..})
  */
 
 class vPush {
@@ -14,11 +17,27 @@ class vPush {
     if (!appId) {
       throw new Error("[vPush.init] 请传递appId参数");
     }
-    this.HOST = `https://${appId}.mssnn.cn/v1`;
+    this.HOST = `https://${appId}.mssnn.cn/v2`;
     this.STORAGE_KEY = '_VPUSH_PRO_OPENID';
     this.OPEN_ID = '';
 
     this.init();
+  }
+
+  // http请求后端
+  _request (uri, data) {
+    return new Promise((RES, REJ) => {
+      wx.request({
+        url: `${this.HOST}${uri}`,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        data,
+        success: RES,
+        fail: REJ
+      })
+    });
   }
 
   /**
@@ -42,27 +61,19 @@ class vPush {
         // 获取当前操作系统等信息
         var info = wx.getSystemInfoSync();
         // 更新用户数据
-        wx.request({
-          url: `${this.HOST}/c/update.php?openid=${openid}`,
-          method: 'POST',
-          header: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          },
-          data: {
-            // 用户昵称、头像、性别
-            nickName: userInfo.nickName,
-            avatarUrl: userInfo.avatarUrl,
-            gender: userInfo.gender,
-            // 系统信息
-            system: info.system,
-            platform: info.platform,
-            version: info.version,
-            language: info.language,
-            sdk: info.SDKVersion
-          },
-          success: ret => {
-            console.log('[vpush.update.ok]', ret);
-          }
+        this._request('/client/update?openid=' + this.OPEN_ID, {
+          // 用户昵称、头像、性别
+          nickName: userInfo.nickName,
+          avatarUrl: userInfo.avatarUrl,
+          gender: userInfo.gender,
+          // 系统信息
+          system: info.system,
+          platform: info.platform,
+          version: info.version,
+          language: info.language,
+          sdk: info.SDKVersion
+        }).then(ret => {
+          console.log('[vpush.update.ok]', ret);
         });
       });
     }).catch(err => {
@@ -82,20 +93,18 @@ class vPush {
       // 没有，就初始化
       wx.login({
         success: res => {
-          wx.request({
-            url: `${this.HOST}/c/init.php?code=${res.code}`,
-            success: ret => {
-              const { data } = ret;
-              console.log('[vpush.init.ret]', data);
-              if (data.errcode !== 0) {
-                return REJ(data.errmsg);
-              }
-              RES(data.openid);
-              // 存储到缓存
-              wx.setStorageSync(this.STORAGE_KEY, data.openid);
-            },
-            fail: REJ
-          })
+          this._request('/client/init', {
+            code: res.code
+          }).then(ret => {
+            const { data } = ret;
+            console.log('[vpush.init.ret]', data);
+            if (data.errcode !== 0) {
+              return REJ(data.errmsg);
+            }
+            RES(data.openid);
+            // 存储到缓存
+            wx.setStorageSync(this.STORAGE_KEY, data.openid);
+          }).catch(REJ);
         },
         fail: REJ
       })
@@ -121,25 +130,17 @@ class vPush {
    */
   togglePush(openPush = true) {
     return new Promise((RES, REJ) => {
-      wx.request({
-        url: `${this.HOST}/c/push.php?openid=${this.OPEN_ID}`,
-        method: 'POST',
-        data: {
-          open: openPush ? 1 : 0
-        },
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        success: ret => {
-          console.log('[vpush.togglePush.ret]', ret);
-          let { data } = ret;
-          if (data.errcode === 0) {
-            console.log('[vpush.togglePush.ok]', data.message);
-            RES();
-          } else {
-            console.warn('[vpush.togglePush.fail]', data.errmsg);
-            REJ(data.errmsg);
-          }
+      this._request('/client/push?openid=' + this.OPEN_ID, {
+        open: openPush ? 1 : 0
+      }).then(ret => {
+        console.log('[vpush.togglePush.ret]', ret);
+        let { data } = ret;
+        if (data.errcode === 0) {
+          console.log('[vpush.togglePush.ok]', data.message);
+          RES();
+        } else {
+          console.warn('[vpush.togglePush.fail]', data.errmsg);
+          REJ(data.errmsg);
         }
       })
     })
@@ -151,9 +152,8 @@ class vPush {
   isOpenPush() {
     if (!this.OPEN_ID) return console.warn('[vPush.isOpenPush] 尚未初始化完毕');
     return new Promise((RES, REJ) => {
-      wx.request({
-        url: `${this.HOST}/c/push.php?openid=${this.OPEN_ID}`,
-        success: ret => {
+      this._request('/client/push?openid=' + this.OPEN_ID, {})
+        .then(ret => {
           console.log('[vpush.isopenpush.ret]', ret);
           const { data } = ret;
           if (data.errcode !== 0) {
@@ -162,9 +162,8 @@ class vPush {
           }
           console.log('[vpush.isopenPush.ok]', data);
           RES(data.openPush === 1);
-        },
-        fail: REJ
-      })
+        })
+        .catch(REJ);
     })
   }
 
@@ -201,25 +200,17 @@ class vPush {
 
     // 获取当前页面地址
     let page = getCurrentPages()[0].route;
-    wx.request({
-      url: `${this.HOST}/c/formId.php?openid=${this.OPEN_ID}`,
-      method: 'POST',
-      header: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      data: {
-        page,
-        formId
-      },
-      success: ret => {
-        callback && callback();
-        console.log('[vpush.addFormId.ret]', ret);
-        const { data } = ret;
-        if (data.errcode !== 0) {
-          return console.warn('[vpush.addForm.fail]', data.errmsg);
-        }
-        console.log('[vpush.addFormId.ok]', data.message);
+    this._request('/client/formid?openid=' + this.OPEN_ID, {
+      page,
+      formId
+    }).then(ret => {
+      callback && callback();
+      console.log('[vpush.addFormId.ret]', ret);
+      const { data } = ret;
+      if (data.errcode !== 0) {
+        return console.warn('[vpush.addForm.fail]', data.errmsg);
       }
+      console.log('[vpush.addFormId.ok]', data.message);
     });
   }
 }
