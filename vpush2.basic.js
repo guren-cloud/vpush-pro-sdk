@@ -2,10 +2,10 @@
  * vPush/2.0 Basic基础版SDK
  * -------------
  * 独立部署版专用SDK
- * 网址：https://vpush.cloud
+ * 网址：https://vpush.pro
  * =============
  * https://github.com/guren-cloud/vpush-pro-sdk
- * 更新时间：2019/05/23
+ * 更新时间：2019/05/30
  * -------------
  * 使用方法：
  * - app.js中引入此模块文件，然后初始化：App({ vPush: new vPush('你的API服务接口地址'), ..})
@@ -20,7 +20,7 @@ class vPush {
       throw new Error("[vPush.init] 请设置您的API服务接口地址");
     }
     console.log("[*] vPush/2.0 专业、高效、实用的小程序消息推送平台");
-    console.log("[+] https://vpush.cloud");
+    console.log("[+] https://vpush.pro");
     this.HOST = api + '/v1';
     this.STORAGE_KEY = '_VPUSH2_BASIC_OPENID';
     this.OPEN_ID = '';
@@ -42,6 +42,17 @@ class vPush {
         fail: REJ
       })
     });
+  }
+
+  // get请求
+  _get(uri) {
+    return new Promise((RES, REJ) => {
+      wx.request({
+        url: `${this.HOST}${uri}`,
+        success: RES,
+        fail: REJ
+      })
+    })
   }
 
   /**
@@ -161,22 +172,18 @@ class vPush {
   isOpenPush() {
     if (!this.OPEN_ID) return console.warn('[vPush.isOpenPush] 尚未初始化完毕');
     return new Promise((RES, REJ) => {
-      wx.request({
-        url: this.HOST + '/client/push?openid=' + this.OPEN_ID,
-        success: ret => {
-          console.log('[vpush.isopenpush.ret]', ret);
-          const { data } = ret;
-          if (data.errcode !== 0) {
-            console.warn('[vpush.isOpenPush.err]', data);
-            REJ(data.errmsg);
-          }
-          console.log('[vpush.isopenPush.ok]', data);
-          RES(data.openPush === 1);
-        },
-        fail: REJ
-      })
+      this._get('/client/push?openid=' + this.OPEN_ID).then(ret => {
+        const { data } = ret;
+        if (data.errcode !== 0) {
+          console.warn('[vpush.isOpenPush.err]', data);
+          REJ(data.errmsg);
+        }
+        console.log('[vpush.isopenPush.ok]', data);
+        RES(data.openPush === 1);
+      });
     })
   }
+
 
   // 兼容社区版SDK
   add(e) {
@@ -223,12 +230,9 @@ class vPush {
     if (!this.OPEN_ID) {
       return setTimeout(() => this.getFormIdCounts(callback), 1000);
     }
-    wx.request({
-      url: `${this.HOST}/formids/user_counts?openId=${this.OPEN_ID}`,
-      success: ret => {
-        callback(ret.data.counts)
-      }
-    })
+    this._get(`/formids/user_counts?openId=${this.OPEN_ID}`).then(ret => {
+      callback(ret.data.counts)
+    });
   }
 }
 
