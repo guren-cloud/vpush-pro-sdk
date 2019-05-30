@@ -4,13 +4,13 @@
 > 你可以根据自己使用的推送平台，引入对应的模块文件。
 
 ## 高级版
-> 官网：https://mssnn.cn
+> 官网：https://mssnn.cn    
 > 文档：http://doc.mssnn.cn
 
 对应核心文件：`vpush.pro.js`
 
 ## 专业版
-> 官网：https://vpush.cloud
+> 官网：https://vpush.cloud    
 > 文档：https://www.kancloud.cn/mssnn_cn/vpush/1068329
 
 对应核心文件：
@@ -53,5 +53,6 @@ App({
 
 - - -
 
-更多内容，请查阅开发文档，或者关注古人云公众号：
+更多内容，请查阅开发文档，或者关注古人云公众号：    
+
 ![](https://mssnn.cn/img/qr_gurenyun.jpg)
