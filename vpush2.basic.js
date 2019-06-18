@@ -234,6 +234,16 @@ class vPush {
       callback(ret.data.counts)
     });
   }
+
+  /**
+   * 设置用户的tag标签，用于分类推送
+   * @param {string} tag 标签名称
+   */
+  setTag(tag) {
+    return this._request("/client/settag?openid=" + this.OPEN_ID, {
+      tag
+    });
+  }
 }
 
 module.exports = vPush;
