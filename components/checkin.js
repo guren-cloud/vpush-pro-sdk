@@ -17,7 +17,7 @@
 const { vPush } = getApp();
 
 // 今日签到标识
-const CHECKIN_STORAGE_KEY = new Date().toLocaleDateString();
+const CHECKIN_STORAGE_KEY = 'vpush_checkin_' + new Date().toLocaleDateString();
 
 Component({
   /**
@@ -59,13 +59,14 @@ Component({
     // 2. 隐藏签到卡
     // 3. 回调父层onCheckIn函数
     checkin: function (e) {
-      vPush.addFormId(e, () => {
-        this.setData({
-          SHOW_CLASS: 'animation-hide'
-        });
-        wx.setStorageSync(CHECKIN_STORAGE_KEY, '1');
-        this.triggerEvent('onCheckIn', e, {});
+      vPush.addFormId(e);
+      // vPush.addFormId(e, () => {
+      this.setData({
+        SHOW_CLASS: 'animation-hide'
       });
+      wx.setStorageSync(CHECKIN_STORAGE_KEY, '1');
+      this.triggerEvent('CheckIn', e, {});
+      // });
     }
   }
 })
