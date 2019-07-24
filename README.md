@@ -50,6 +50,11 @@ App({
 
 刷新小程序，如果出现弹框签到提示，那么就代表集成OK了！ 
 
+## 快速体验
+快速体验小程序推送：
+![](https://box.kancloud.cn/16e25a0fd4af82e382dd1940c5de4e7c_430x430.png)
+
+官方一键部署平台地址：[https://bigse.cn](https://bigse.cn)
 
 - - -
 
