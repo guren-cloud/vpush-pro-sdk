@@ -14,6 +14,8 @@
  * - 这个SDK需要你配置你的小程序的request域名，为你部署好的API服务器地址。
  */
 
+const Subscribe = require('./addons/subscribe.js');
+
 class vPush {
   constructor(api) {
     if (!api) {
@@ -243,6 +245,15 @@ class vPush {
     return this._request("/client/settag?openid=" + this.OPEN_ID, {
       tag
     });
+  }
+  
+  // 弹出订阅消息
+  // 使用方法同wx.requestSubscribeMessage
+  dingyue (opts) {
+    return this.subscribe(opts);
+  }
+  subscribe (opts) {
+    return new Subscribe(opts, this.OPEN_ID, this._request.bind(this));
   }
 }
 
